@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Type Prediction</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        #output { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>Upload an Image to Predict its Type</h2>
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" id="image-upload" name="file" accept="image/*" />
+        <button type="submit">Predict Type</button>
+    </form>
+
+    <div id="output"></div>
+
+    <script>
+        document.getElementById("upload-form").onsubmit = async function(event) {
+            event.preventDefault();
+
+            const formData = new FormData();
+            const fileInput = document.getElementById("image-upload");
+            formData.append("file", fileInput.files[0]);
+
+            const response = await fetch("http://localhost:5000/predict", {
+                method: "POST",
+                body: formData
+            });
+            
+            const result = await response.json();
+            document.getElementById("output").innerText = "Prediction: " + result.prediction;
+        }
+    </script>
+
+</body>
+</html>
