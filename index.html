@@ -6,6 +6,7 @@
     <title>Image Type Prediction</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        #uploaded-image { max-width: 300px; max-height: 300px; margin-top: 20px; }
         #output { margin-top: 20px; font-weight: bold; }
     </style>
 </head>
@@ -17,24 +18,47 @@
         <button type="submit">Predict Type</button>
     </form>
 
+    <img id="uploaded-image" src="" alt="Uploaded Image Preview" style="display: none;" />
     <div id="output"></div>
 
     <script>
-        document.getElementById("upload-form").onsubmit = async function(event) {
+        const uploadForm = document.getElementById("upload-form");
+        const imageUpload = document.getElementById("image-upload");
+        const uploadedImage = document.getElementById("uploaded-image");
+        const output = document.getElementById("output");
+
+        // Show uploaded image preview
+        imageUpload.onchange = () => {
+            const file = imageUpload.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedImage.src = e.target.result;
+                    uploadedImage.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        // Handle form submission
+        uploadForm.onsubmit = async (event) => {
             event.preventDefault();
+            output.innerText = "Predicting...";
 
             const formData = new FormData();
-            const fileInput = document.getElementById("image-upload");
-            formData.append("file", fileInput.files[0]);
+            formData.append("file", imageUpload.files[0]);
 
-            const response = await fetch("http://localhost:5000/predict", {
-                method: "POST",
-                body: formData
-            });
-            
-            const result = await response.json();
-            document.getElementById("output").innerText = "Prediction: " + result.prediction;
-        }
+            try {
+                const response = await fetch("http://localhost:5000/predict", {
+                    method: "POST",
+                    body: formData,
+                });
+                const result = await response.json();
+                output.innerText = "Prediction: " + result.prediction;
+            } catch (error) {
+                output.innerText = "Error predicting the image type.";
+            }
+        };
     </script>
 
 </body>
